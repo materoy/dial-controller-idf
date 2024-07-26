@@ -269,7 +269,7 @@ impl Keyboard {
         let ble_advertising = device.get_advertising();
         ble_advertising.lock().scan_response(true).set_data(
             BLEAdvertisementData::new()
-                .name("ESP32 Keyboard")
+                .name("Dial controller")
                 .appearance(0x03C1)
                 .add_service_uuid(hid.hid_service().lock().uuid()),
         )?;
@@ -324,19 +324,16 @@ impl Keyboard {
         self.input_keyboard.lock().set_from(keys).notify();
         esp_idf_svc::hal::delay::Ets::delay_ms(7);
     }
-}
-
-fn main() -> anyhow::Result<()> {
-    esp_idf_svc::sys::link_patches();
-    esp_idf_svc::log::EspLogger::initialize_default();
-
-    let mut keyboard = Keyboard::new()?;
-
-    loop {
-        if keyboard.connected() {
-            log::info!("Sending 'Hello world'...");
-            keyboard.write("    \n");
-        }
-        esp_idf_svc::hal::delay::FreeRtos::delay_ms(5000);
+    
+    pub fn press_enter(&mut self) {
+        self.write_char(0x28); // Enter
+    }
+    
+    pub fn press_arrow_back(&mut self) {
+        self.write_char(0x50); // Arrow Left
+    }
+    
+    pub fn press_arrow_forward(&mut self) {
+        self.write_char(0x4f); // Arrow Right
     }
 }
