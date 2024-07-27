@@ -187,9 +187,15 @@ impl Keyboard {
     
     pub fn press_arrow_back(&mut self) {
         self.send_char(0x50); // Arrow Left
+        self.send_char(0xe1 | 0x2b); // Shift TAB
     }
     
     pub fn press_arrow_forward(&mut self) {
-        self.send_char(0x4f); // Arrow Right
+        // self.send_char(0x4f); // Arrow Right
+        self.send_char(0x2b); // TAB
+    }
+    
+    pub fn press_escape(&mut self) {
+        self.send_char(0x29); // Backspace
     }
 }
