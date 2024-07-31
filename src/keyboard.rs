@@ -1,7 +1,6 @@
 // originally: https://github.com/T-vK/ESP32-BLE-Keyboard
 #![allow(dead_code)]
 
-
 use std::sync::Arc;
 
 use esp32_nimble::{

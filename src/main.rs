@@ -2,24 +2,21 @@ use esp_idf_svc::hal::delay::FreeRtos;
 use esp_idf_svc::hal::gpio::{InputPin, OutputPin};
 use esp_idf_svc::hal::prelude::Peripherals;
 use crate::button::ButtonPressType;
+use crate::joystick::joystick_loop;
 use crate::keyboard::Keyboard;
 use crate::rotary_encoder::RotaryEncoder;
 
 mod keyboard;
 mod rotary_encoder;
 mod button;
-
+mod joystick;
 
 fn setup() {
     esp_idf_svc::sys::link_patches();
     esp_idf_svc::log::EspLogger::initialize_default();
 }
 
-fn main_loop<T, K, A>(mut rotary_encoder: RotaryEncoder<T, K, A>, mut keyboard: Keyboard) -> !
-where
-    T: InputPin + OutputPin,
-    K: InputPin + OutputPin,
-    A: InputPin + OutputPin,
+fn main_loop(mut rotary_encoder: RotaryEncoder, mut keyboard: Keyboard) -> !
 {
     loop {
         // Waits until ble is connected
@@ -42,32 +39,16 @@ where
     }
 }
 
+
 fn main() -> anyhow::Result<()> {
     setup();
 
     let peripherals = Peripherals::take()?;
-    let rotary_encoder = RotaryEncoder::new(peripherals.pins.gpio2, peripherals.pins.gpio3, peripherals.pins.gpio1);
+    // joystick_loop(peripherals)?;
+    
+    let rotary_encoder = 
+        RotaryEncoder::new(peripherals);
     let keyboard = Keyboard::new()?;
     main_loop(rotary_encoder, keyboard)
 
-    // let y_pin = PinDriver::input(peripherals.pins.gpio2).unwrap();
-    // let x_pin = PinDriver::input(peripherals.pins.gpio3).unwrap();
-    // let button_pin = PinDriver::input(peripherals.pins.gpio1).unwrap();
-    // let adc1 = AdcDriver::new(peripherals.adc1)?;
-    //
-    // let mut adc_config = AdcChannelConfig::default();
-    // adc_config.calibration = true;
-    // adc_config.attenuation = esp_idf_svc::hal::adc::attenuation::DB_11;
-    // let mut adc_y_pin =
-    //     AdcChannelDriver::new(&adc1, peripherals.pins.gpio2, &adc_config)?;
-    //
-    // let mut adc_x_pin =
-    //     AdcChannelDriver::new(&adc1, peripherals.pins.gpio3, &adc_config)?;
-    //
-    // loop {
-    //     sleep(Duration::from_millis(10));
-    //     let adc_x = adc1.read(&mut adc_x_pin)?;
-    //     let adc_y = adc1.read(&mut adc_y_pin)?;
-    //     log::info!("X: {}   Y: {}", adc_x, adc_y);
-    // }
 }

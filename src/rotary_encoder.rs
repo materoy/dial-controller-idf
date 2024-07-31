@@ -1,30 +1,22 @@
-use esp_idf_svc::hal::gpio::{Input, InputPin, Level, OutputPin, PinDriver};
+use esp_idf_svc::hal::gpio::{Gpio1, Gpio2, Gpio3, Input, Level, PinDriver};
+use esp_idf_svc::hal::peripherals::Peripherals;
+
 use crate::button::Button;
 use crate::keyboard::Keyboard;
 
-pub struct RotaryEncoder<'d, T, K, A>
-where
-    T: InputPin + OutputPin,
-    K: InputPin + OutputPin,
-    A: InputPin + OutputPin,
-{
-    clk_pin: PinDriver<'d, T, Input>,
-    dt_pin: PinDriver<'d, K, Input>,
-    pub(crate) button: Button<'d, A>,
+pub struct RotaryEncoder<'d> {
+    clk_pin: PinDriver<'d, Gpio2, Input>,
+    dt_pin: PinDriver<'d, Gpio3, Input>,
+    pub button: Button<'d, Gpio1>,
     counter: i32,
     prev_clk_state: Level,
 }
 
-impl<'d, T, K, A> RotaryEncoder<'d, T, K, A>
-where
-    T: InputPin + OutputPin,
-    K: InputPin + OutputPin,
-    A: InputPin + OutputPin,
-{
-    pub(crate) fn new(clk_pin: T, dt_pin: K, sw_pin: A) -> Self {
-        let clk_pin = PinDriver::input(clk_pin).unwrap();
-        let dt_pin = PinDriver::input(dt_pin).unwrap();
-        let button = Button::new(sw_pin);
+impl<'d> RotaryEncoder<'d> {
+    pub(crate) fn new(peripherals: Peripherals) -> Self {
+        let clk_pin = PinDriver::input(peripherals.pins.gpio2).unwrap();
+        let dt_pin = PinDriver::input(peripherals.pins.gpio3).unwrap();
+        let button = Button::new(peripherals.pins.gpio1);
         let clk_state = clk_pin.get_level();
         RotaryEncoder {
             clk_pin,
